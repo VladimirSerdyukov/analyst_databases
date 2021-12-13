@@ -41,5 +41,16 @@ with
 	# проверка
 		(select 'original' as sours, count(user_id) as o_count_u, sum(price) as o_sum_price from orders 
 		union all
-		select 'function' as sours, sum(count_user) as o_count_u, sum(turnover) as o_sum_price from group_cat)
-select * from test;
+		select 'function' as sours, sum(count_user) as o_count_u, sum(turnover) as o_sum_price from group_cat),
+	count_group(group_c, c_user, c_turnover) as 
+	# количество по группами
+		(select group_c, sum(count_user), sum(turnover) from group_cat group by group_c
+		union all
+		select 'original' as group_c, count(user_id) as o_count_u, sum(price) as o_sum_price from orders),
+	persent_group(group_c, per_user, per_turnover) as 
+	# доли занимаемые группами
+		(select group_c,
+		sum(count_user) * 100 / (select  count(user_id) from orders),
+		sum(turnover) * 100 / (select  sum(price) from orders)
+		from group_cat group by group_c)
+select * from persent_group;
